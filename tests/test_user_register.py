@@ -4,6 +4,7 @@ import requests
 import pytest
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
+from lib.my_requests import MyRequests
 
 
 class TestUserRegister(BaseCase):
@@ -17,7 +18,7 @@ class TestUserRegister(BaseCase):
 
     def test_create_user_successfully(self):
         data = self.user_data_provider()
-        response = requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response = MyRequests.post("/user/", data=data)
         Assertions.assert_code_status(response, 200)
         Assertions.assert_json_has_key(response, "id")
 
@@ -32,30 +33,30 @@ class TestUserRegister(BaseCase):
             'email': email
         }
 
-        response = requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response = MyRequests.post("/user/", data=data)
         Assertions.assert_code_status(response, 400)
         assert response.text == f"Users with email '{email}' already exists", \
             f"Unexpected response content {response.content}"
 
     def test_create_user_with_invalid_email(self):
         data = self.user_data_provider(email="testemail.com")
-        response = requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response = MyRequests.post("/user/", data=data)
         Assertions.assert_code_status(response, 400)
 
     @pytest.mark.parametrize('field', ['username', 'password', 'email', 'firstName', 'lastName'])
     def test_create_user_without_field(self, field):
         data = self.user_data_provider()
         data.pop(field)
-        response = requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response = MyRequests.post("/user/", data=data)
         Assertions.assert_code_status(response, 400)
 
     def test_create_user_with_short_name(self):
         data = self.user_data_provider(firstName="A")
-        response = requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response = MyRequests.post("/user/", data=data)
         Assertions.assert_code_status(response, 400)
 
     def test_create_user_with_long_name(self):
         name = "A" * 251
         data = self.user_data_provider(firstName=name)
-        response = requests.post("https://playground.learnqa.ru/api/user/", data=data)
+        response = MyRequests.post("/user/", data=data)
         Assertions.assert_code_status(response, 400)
