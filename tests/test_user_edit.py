@@ -4,10 +4,12 @@ import requests
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
 from lib.my_requests import MyRequests
+import allure
 
-
+@allure.epic("User Edition Tests")
 class TestUserEdit(BaseCase):
 
+    @allure.story("Ability to edit a user after registration")
     def test_edit_just_created_user(self):
         register_data = self.user_data_provider()
         response1 = MyRequests.post("/user/", data=register_data)
@@ -47,7 +49,7 @@ class TestUserEdit(BaseCase):
                                              new_name,
                                              "Wrong name of the user after edit"
                                              )
-
+    @allure.story("Inability to edit user's data when unauthorized")
     def test_edit_user_unauthorized(self):
 
         register_data = self.user_data_provider()
@@ -61,7 +63,8 @@ class TestUserEdit(BaseCase):
         assert response_json.get("error") == "Auth token not supplied", \
             f"Unexpected response content {response2.content.decode('utf-8')}"
 
-    # @pytest.mark.xfail(reason="Unauthorized edit had been allowed by API")
+    @allure.story("Inability to edit a user when authorized as another user")
+    @pytest.mark.xfail(reason="Unauthorized edit had been allowed by API")
     def test_edit_user_authorized_as_another_user(self):
         first_user_data = self.user_data_provider()
         response1 = MyRequests.post("/user/", data=first_user_data)
@@ -90,6 +93,7 @@ class TestUserEdit(BaseCase):
         Assertions.assert_json_value_by_name(response5, "firstName", first_user_data['firstName'],
                                              "Name of the first user was changed.")
 
+    @allure.story("Inability to change user email to an invalid one")
     def test_edit_user_invalid_email(self):
         user_data = self.user_data_provider()
         response1 = MyRequests.post("/user/", data=user_data)
@@ -110,6 +114,7 @@ class TestUserEdit(BaseCase):
                                    )
         Assertions.assert_code_status(response3, 400)
 
+    @allure.story("Inability to change user first name to a very short value")
     def test_edit_user_short_first_name(self):
         user_data = self.user_data_provider()
         response1 = MyRequests.post("/user/", data=user_data)

@@ -1,12 +1,14 @@
 from lib.base_case import BaseCase
 from lib.assertions import Assertions
 import requests
+import allure
 
 from lib.my_requests import MyRequests
 
-
+@allure.epic("User Retrieval Tests")
 class TestUserGet(BaseCase):
 
+    @allure.story("User details retrieval without authentication")
     def test_get_user_details_not_auth(self):
         response = MyRequests.get("/user/2")
 
@@ -15,6 +17,7 @@ class TestUserGet(BaseCase):
         Assertions.assert_json_has_no_key(response, "firstName")
         Assertions.assert_json_has_no_key(response, "lastName")
 
+    @allure.description("User details retrieval after authenticating as that user")
     def test_get_user_details_auth_as_same_user(self):
         data = {
             'email': 'vinkotov@example.com',
@@ -32,6 +35,7 @@ class TestUserGet(BaseCase):
         expected_fields = ["username", "email", "firstName", "lastName"]
         Assertions.assert_json_has_keys(response2, expected_fields)
 
+    @allure.description("User's details retrieval authenticated by another user ")
     def test_get_another_user_data_after_auth(self):
         data = {
             'email': 'vinkotov@example.com',

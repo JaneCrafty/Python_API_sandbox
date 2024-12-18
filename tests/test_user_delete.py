@@ -2,10 +2,13 @@ import pytest
 import requests
 from lib.base_case import BaseCase
 from lib.my_requests import MyRequests
+import allure
 
-
+@allure.epic("User Deletion Tests")
 class TestUserDelete(BaseCase):
 
+    @allure.story("User with ID=2 deletion")
+    @allure.description("This test verifies that user with ID 2 can't be deleted")
     def test_delete_user_2(self):
         data = {
             'email': 'vinkotov@example.com',
@@ -18,6 +21,7 @@ class TestUserDelete(BaseCase):
         response2 = MyRequests.delete("/user/2", headers={"x-csrf-token": token}, cookies={"auth_sid": auth_sid})
         assert response2.status_code == 400, f"Unexpected status code {response2.status_code}"
 
+    @allure.story("Successful user removal")
     def test_positive_delete_created_user(self):
         registration_data = self.user_data_provider()
         response1 = MyRequests.post("/user/", data=registration_data)
@@ -35,6 +39,8 @@ class TestUserDelete(BaseCase):
         response4 = MyRequests.get(f"/user/{user_id}")
         assert response4.status_code == 404, f"Unexpected status code {response4.status_code}"
 
+    @allure.story("Inability to delete a user by another user")
+    @allure.severity("Critical")
     def test_delete_user_authorized_as_another_user(self):
         first_user_data = self.user_data_provider()
         response_first_user = MyRequests.post("/user/", data=first_user_data)
